@@ -3,6 +3,8 @@ const path = require('path');
 const exphbs = require('express-handlebars');
 require('dotenv').config();
 
+// Creates the stripe client using SECRET KEY. Only executes on server
+// This is crucial for security. The secret key should NEVER reach the browser
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -15,11 +17,12 @@ app.engine('hbs', exphbs({
 app.set('view engine', 'hbs');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }))
-
-
 app.use(express.json({}));
 
-// Creatd a function to house product catalogue for reuse within multiple routes
+// Creatd a function to house product catalog for reuse within multiple routes
+// This function also serves to keep the price on the server-side rather than allowing it 
+// to be tampered on the client side. Follows best practices from Stripe Documentation.
+
 function grabItemInfo(item) {
   let title, amount, error;
 
@@ -52,6 +55,9 @@ app.get('/', function(req, res) {
 
 /**
  * Checkout route
+ * 
+ * Renders the payment form for a single book. PaymentIntent is not created yet. 
+ * The PaymentIntent is asked by the browser. Check public/js/checkout.js for logic
  */
 app.get('/checkout', function(req, res) {
   // Just hardcoding amounts here to avoid using a database
@@ -62,13 +68,20 @@ app.get('/checkout', function(req, res) {
     title: title,
     amount: amount,
     error: error,
+    // Passed through the page so the browser can tell us which item to price
     item: item,
     // Passes the publishable key to be exposed in HTML. Tokenizes payment details.
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
   });
 });
 
+/**
+ * Create PaymentIntent route
+ * 
+ * This is called by the browser as the checkout pages loads. Uses a POST to create state in Stripe.
+ */
 app.post("/create-payment-intent", async (req, res) => {
+  // We only accept the item id from the browser. Not the price.
   const { item } = req.body;
 
   // Allows for book information to be re-derived server-side from the catalog.
@@ -86,6 +99,8 @@ app.post("/create-payment-intent", async (req, res) => {
       automatic_payment_methods: {
         enabled: true,
       },
+      // Added Metadata to see information in Stripe Dashboard about the purchase
+      // Also following Best Practices from Stripe Docs: https://docs.stripe.com/payments/payment-element/best-practices 
       metadata: {
         item: item,
         title: title,
@@ -104,10 +119,20 @@ app.post("/create-payment-intent", async (req, res) => {
 });
 /**
  * Success route
+ * 
+ * Stripe redirects the buyer here after confirmation. Appending 3 parameters:
+ * payment_intent, payment_intent_client_secret, and redirect_status
+ * 
  */
 app.get('/success', async (req, res) => {
   const paymentIntentId = req.query.payment_intent;
   const clientSecret = req.query.payment_intent_client_secret;
+
+  // added a condtion that if someone tries to go to the success page without a
+  // payment Intent or PI client secret it will return an error
+  if (!paymentIntentId || !clientSecret) {
+    return res.status(400).send({ error: 'Missing payment details.' })
+  }
 
   try {
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -120,6 +145,8 @@ app.get('/success', async (req, res) => {
       amount: paymentIntent.amount,
       paymentIntentId: paymentIntent.id,
       title: paymentIntent.metadata.title,
+      // Creating status for success + processing to have a conditional
+      // for the success page to only show 'Success' if the Payment Intent actually succeeds.
       succeeded: paymentIntent.status === 'succeeded',
       processing: paymentIntent.status === 'processing'
     });
