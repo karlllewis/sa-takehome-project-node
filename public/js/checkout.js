@@ -2,8 +2,6 @@
 const stripe = Stripe(publishableKey);
 const urlParams = new URLSearchParams(window.location.search)
 const items = urlParams.get('item')
-// The items the customer wants to buy
-// const items = [{ id: "xl-tshirt", amount: 1000 }];
 
 let elements;
 
