@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const exphbs = require('express-handlebars');
 require('dotenv').config();
-const stripe = require('stripe');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 var app = express();
 
@@ -54,6 +54,24 @@ app.get('/checkout', function(req, res) {
     title: title,
     amount: amount,
     error: error
+  });
+});
+
+app.post("/create-payment-intent", async (req, res) => {
+  const item = req.body.item;
+  
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amount,
+    currency: 'aud',
+    automatic_payment_methods: {
+      enabled: true,
+    }
+  });
+
+  // Return the client_secret of the Payment Intent. Needed to authorize
+  // user's browser to confirm this a single payment.
+  res.send ({
+    clientSecret: paymentIntent.client_secret
   });
 });
 

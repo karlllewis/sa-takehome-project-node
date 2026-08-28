@@ -1,11 +1,14 @@
 {
   "name": "sa-takehome-project-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SA Takehome Project",
   "scripts": {
     "start": "node app.js"
   },
-  "author": "Matt Mitchell",
+  "contributors": [
+    "Matt Mitchell",
+    "Karl Lewis"
+  ],
   "license": "MIT",
   "dependencies": {
     "dotenv": "^10.0.0",

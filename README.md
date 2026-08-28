@@ -1,29 +1,13 @@
-# Take home project
-This is a simple e-commerce application that a customer can use to purchase a book, but it's missing the payments functionality —  your goal is to integrate Stripe to get this application running!
+## Placeholder
 
-## Candidate instructions
-You'll receive these in email.
+fill in later
 
-## Application overview
-This demo is written in Javascript (Node.js) with the [Express framework](https://expressjs.com/). You'll need to retrieve a set of testmode API keys from the Stripe dashboard (you can create a free test account [here](https://dashboard.stripe.com/register)) to run this locally.
 
-We're using the [Bootstrap](https://getbootstrap.com/docs/4.6/getting-started/introduction/) CSS framework. It's the most popular CSS framework in the world and is pretty easy to get started with — feel free to modify styles/layout if you like. 
+Doc used to provide a quick start guide on implementing a checkout page with Payment Intents API
+https://docs.stripe.com/payments/quickstart-payment-intents
 
-To simplify this project, we're also not using any database here, either. Instead `app.js` includes a simple switch statement to read the GET params for `item`. 
+Doc Used to understand how Payment Intents work and their options
+https://docs.stripe.com/payments/payment-intents
 
-To get started, clone the repository and run `npm install` to install dependencies:
-
-```
-git clone https://github.com/mattmitchell6/sa-takehome-project-node && cd sa-takehome-project-node
-npm install
-```
-
-Rename `sample.env` to `.env` and populate with your Stripe account's test API keys
-
-Then run the application locally:
-
-```
-npm start
-```
-
-Navigate to [http://localhost:3000](http://localhost:3000) to view the index page.
+Docs used to test .env and payment intents creation (right now via Stripe CLI)
+https://docs.stripe.com/api/payment_intents/object
