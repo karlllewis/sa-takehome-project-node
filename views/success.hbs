@@ -1,4 +1,5 @@
 <main>
+  {{#if succeeded}}
   <div class="mt-40 text-center text-success">
     <h1>
       <i class="far fa-check-circle"></i> 
@@ -7,7 +8,21 @@
   </div>
   <div class="mt-40 text-center">
     <div class="mt-20 text-center text-secondary border-placeholder">
-      Confirmation of your Payment Intent ID: {{paymentIntentId}}
+      <p>Amount charged: A$<span class="amount" data-amount="{{amount}}"></span></p>
+      <p>Payment Intent ID: {{paymentIntentId}}</p>
+      <p>Thank you for buying: "{{title}}"</p>
     </div>
   </div>
+  {{else if processing}}
+    <div class="mt-40 text-center text-info">
+      <h1><i class="far fa-clock"></i> Payment processing</h1>
+      <p>We'll confirm your order for "{{title}}" once the payment settles.</p>
+      <p>Payment Intent ID: {{paymentIntentId}}</p>
+    </div>
+  {{else}}
+    <div class="mt-40 text-center text-danger">
+      <h1><i class="far fa-times-circle"></i> Payment not completed</h1>
+      <p>Your payment wasn't completed. <a href="/">Return to the shop</a> to try again.</p>
+    </div>
+  {{/if}}  
 </main>
