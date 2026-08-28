@@ -3,8 +3,8 @@ const path = require('path');
 const exphbs = require('express-handlebars');
 require('dotenv').config();
 
-// Creates the stripe client using SECRET KEY. Only executes on server
-// This is crucial for security. The secret key should NEVER reach the browser
+// Creates the stripe client using your account secret key. Only executes on server
+// This is crucial for security. The secret key should never reach the browser
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json({}));
 
-// Creatd a function to house product catalog for reuse within multiple routes
+// Created a function to house product catalog for reuse within multiple routes
 // This function also serves to keep the price on the server-side rather than allowing it 
 // to be tampered on the client side. Follows best practices from Stripe Documentation.
 
@@ -70,7 +70,7 @@ app.get('/checkout', function(req, res) {
     error: error,
     // Passed through the page so the browser can tell us which item to price
     item: item,
-    // Passes the publishable key to be exposed in HTML. Tokenizes payment details.
+    // Passes the publishable key to be exposed in HTML. Account selection and tokenizes payment details.
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
   });
 });
@@ -128,7 +128,7 @@ app.get('/success', async (req, res) => {
   const paymentIntentId = req.query.payment_intent;
   const clientSecret = req.query.payment_intent_client_secret;
 
-  // added a condtion that if someone tries to go to the success page without a
+  // added a condition that if someone tries to go to the success page without a
   // payment Intent or PI client secret it will return an error
   if (!paymentIntentId || !clientSecret) {
     return res.status(400).send({ error: 'Missing payment details.' })
@@ -147,6 +147,7 @@ app.get('/success', async (req, res) => {
       title: paymentIntent.metadata.title,
       // Creating status for success + processing to have a conditional
       // for the success page to only show 'Success' if the Payment Intent actually succeeds.
+      // Processing was added as I experimented with BECS and realized I didnt have webhooks
       succeeded: paymentIntent.status === 'succeeded',
       processing: paymentIntent.status === 'processing'
     });

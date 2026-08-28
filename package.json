@@ -1,6 +1,6 @@
 {
   "name": "sa-takehome-project-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "SA Takehome Project",
   "scripts": {
     "start": "node app.js"
