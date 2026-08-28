@@ -1,6 +1,7 @@
 // This is your test publishable API key.
-const stripe = Stripe("pk_test_51U8eT73XHJ9kGeYAjHq02tny5p2Sa5InxGxDRorG2bFLIANTMwGpZLCy4Sm5ACLesNbBcogLdszHzAq1Pbo8drlk00eCYqypbo");
-
+const stripe = Stripe(publishableKey);
+const urlParams = new URLSearchParams(window.location.search)
+const items = urlParams.get('item')
 // The items the customer wants to buy
 // const items = [{ id: "xl-tshirt", amount: 1000 }];
 
@@ -17,7 +18,7 @@ async function initialize() {
   const response = await fetch("/create-payment-intent", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ item: items }),
   });
   const { clientSecret } = await response.json();
 
@@ -42,7 +43,7 @@ async function handleSubmit(e) {
     elements,
     confirmParams: {
       // Make sure to change this to your payment completion page
-      return_url: wiindow.location.origin + '/success',
+      return_url: window.location.origin + '/success',
     },
   });
 
