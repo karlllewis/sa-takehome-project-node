@@ -23,7 +23,16 @@ On your local machine in Terminal execute the following commands.
 
 ```bash
 git clone https://github.com/karlllewis/sa-takehome-project-node.git && cd sa-takehome-project-node
+```
+
+Now you want to install node dependencies within the project directory:
+```bash
 npm install         # install node dependencies (you could use pnpm or yarn as well)
+```
+
+After you have installed NPM its time to copy the sample.env to the .env file we will use for the demo. 
+
+```bash
 cp sample.env .env         # We will use this file next to place our API keys.
 ```
 
@@ -108,29 +117,32 @@ sequenceDiagram
 ```
 
 ### Some Important Considerations 
-1) The browser tells the server which book with its item number, but the amount it cost is derived from the server. The prices come from the grabItemInfo() function within app.js.The request could be tampered by changing the item number (changing which book you purchase), but the amount is never passed from the client side for payment. This is per Stripe's own best-practices documentation to create the PaymentIntent as soon as you know the amount. 
+1) The browser tells the server which book with its item number, but the amount it cost is derived from the server. The prices come from the `grabItemInfo()` function within app.js.The request could be tampered by changing the item number (changing which book you purchase), but the amount is never passed from the client side for payment. This is per Stripe's own best-practices documentation to create the PaymentIntent as soon as you know the amount. 
 2) The  Payment Element requires a client secret in order to mount, but in order to receive a client secret a PaymentIntent needs to be made. The POST is used to create a PaymentIntent when the checkout page loads (allowing for a client secret to also be generated). This means there is potential for the PaymentIntent to sit on the Dashboard waiting but never receiving payment.
-3) Stripe.js renders the Payment Element within an iframe from Stripe's own origin, so whenever a user puts in payment details, that information is passed directly to Stripe and is never stored on the server or logs. This is crucial as its one of the main reasons customers benefit from Payment Element over custom forms where PCI compliance plays a much larger role.
-4) The success page of this demo actually reaches out to Stripe to get the status of the payment as opposed to simply refering to the redirect_status. This is intentional to not trust information from the client side as it could be tampered with. The API call to Stripe to obtain the status is server-side using secret key.
-5) This demo has been tested for card payments, but has automatic_payment_methods enabled. Stripe can offer methods that take time to settle, but we have left the use of webhooks and more advanced topics for a later date.
+3) `Stripe.js` renders the Payment Element within an iframe from Stripe's own origin, so whenever a user puts in payment details, that information is passed directly to Stripe and is never stored on the server or logs. This is crucial as its one of the main reasons customers benefit from Payment Element over custom forms where PCI compliance plays a much larger role.
+4) The success page of this demo actually reaches out to Stripe to get the status of the payment as opposed to simply refering to the `redirect_status`. This is intentional to not trust information from the client side as it could be tampered with. The API call to Stripe to obtain the status is server-side using secret key.
+5) This demo has been tested for card payments, but has `automatic_payment_methods enabled`. Stripe can offer methods that take time to settle, but we have left the use of webhooks and more advanced topics for a later date.
 
 ---
 
 ## Approach, Docs, and Helpful Resources
 
 When attempting to develop this demo myself the first approach was to familiarize myself with the concept of the Payment Element and how and why would they be  beneficial for an organization looking to provide secure and adaptable checkout options for their customers. I used Stripe's documentation to understand the how and why. This included the following docs:
+
 *  [Stripe API 101](https://docs.stripe.com/payments-api/tour )
 *  [Understanding Payment Element](https://docs.stripe.com/payments/payment-element )
 *  [Payment Element Quick Start Guide](https://docs.stripe.com/payments/quickstart-payment-intents )
 
 
-The next step was to follow along with the quickstart guide and to use the example code as guides and templates for introducing the necessary changes to the existing codebase. This included creating the PaymentIntent route, configuring checkout.js, and applying the proper Payment Element into the checkout page. The quick start guide is extremely useful but I used other documentation to really adjust it to my needs. I've included them below:
+The next step was to follow along with the quickstart guide and to use the example code as guides and templates for introducing the necessary changes to the existing codebase. This included creating the PaymentIntent route, configuring `checkout.js`, and applying the proper Payment Element into the checkout page. The quick start guide is extremely useful but I used other documentation to really adjust it to my needs. I've included them below:
+
 * [Understanding PaymentIntents](https://docs.stripe.com/payments/payment-intents)
 * [PaymentIntents Lifecycle](https://docs.stripe.com/payments/paymentintents/lifecycle)
 * [Understanding `stripe.confirmPayment()`](https://docs.stripe.com/js/payment_intents/confirm_payment)
 * [Understanding `payment_intent` object](https://docs.stripe.com/api/payment_intents/object)
 
 After getting the payment element to appear and accept my first card payment. I set out to learn more about security best practices, how to test and approach testing, and how to introduce some general best practices into the existing integration. The Docs that helped with that are:
+
 * [Payment Element Best Practices](https://docs.stripe.com/payments/payment-element/best-practices)
 * [Card Testing](https://docs.stripe.com/testing)
 * [Australia BECS Testing](https://docs.stripe.com/payments/au-becs-debit)
@@ -156,7 +168,7 @@ Challenges were certainly felt on this journey. All of the problems encountered 
 
 ## Extensions and Improvements
 
-**Although the demo is correct and fit to purpose on the path it was designed for and can handle a few failure cases, it certainly lacks durability**. Improvements I would suggest for making this more robust:
+**Although the demo is correct and fit to purpose on the path it was designed for and can handle a few failure cases, it certainly lacks durability**. Improvements I would suggest for making this demo more robust:
 
 | Gap | Fix | Why it matters |
 | --- | --- | --- |
@@ -165,3 +177,8 @@ Challenges were certainly felt on this journey. All of the problems encountered 
 |Duplicate PaymentIntents on retry | [Idempotency key](https://docs.stripe.com/payments/payment-intents#best-practices) on `paymentIntents.create()` | A double-click could lead to duplicates, so its best to follow best practices for Idempotency |
 |Payment State trusted from a browser round-trip | Use signed [webhooks](https://docs.stripe.com/webhooks/handling-payment-events) | The webhook would allow for more robust delivery guarantee. Use it with signature verification from Stripe|
 |Limited support for other Stripe Products | Use [Checkout Sessions API](https://docs.stripe.com/payments/quickstart) instead of Payment Intents API | This would allow for more robust coverage of use cases such as tax, subscriptions, and adaptive pricing|
+
+**For Partners wanting to use this demo I would consider the following specifically**
+* Create the Demo using the **Checkout Sessions API** to build into other use cases
+* Add Webhook handling and make it non-optional for any reference build
+* Ship the demo with ironed out failure paths, instead of just the success route. 
